@@ -8,6 +8,14 @@ title: "Organize Data Notebook"
 library(here)
 source(here("utils","check_packages.R"))
 source(here("utils","functions.R"))
+
+
+library(readr)
+library(dplyr)
+
+ipums_data <- read_csv("../data/data_raw/usa_00004.dat.gz")
+
+
 ```
 
 This quarto doc is used to organize the data.

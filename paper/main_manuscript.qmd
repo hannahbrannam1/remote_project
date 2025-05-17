@@ -36,7 +36,16 @@ This quarto doc is for writing the manuscript. This is a test citation [@alba199
 
 # Background
 
+People have been studying the differences between men and women in employment for a long time. We know that having a college degree usually helps people get jobs, but it’s not clear if women with college degrees have the same chances of being employed as men with the same education. This study looks at whether women with college degrees are less likely to have jobs compared to men, using recent data from across the country.
+
 # Data and Methods
+
+I downloaded a custom extract from IPUMS that includes the following variables:  
+- SEX: Coded to distinguish men and women  
+- EDUC: Educational attainment  
+- EMPSTAT: Employment status  
+
+The sample includes hundreds of thousands of respondents, making the findings highly generalizable to the U.S. population. All data used are from the 2022 ACS 1-Year Sample.
 
 # Results
 
