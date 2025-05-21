@@ -10,10 +10,29 @@ source(here("utils","check_packages.R"))
 source(here("utils","functions.R"))
 
 
+```
+
+
+```{r}
+
 library(readr)
 library(dplyr)
 
-ipums_data <- read_csv("../data/data_raw/usa_00004.dat.gz")
+ipums_data <- read_fwf(
+  file = "data/data_raw/gendergrad.dat.gz",
+  col_positions = fwf_cols(
+    year     = c(1, 4),
+    serial   = c(5, 12),
+    pernum   = c(13, 16),
+    perwt    = c(17, 26),
+    sex      = c(27, 27),
+    educ     = c(28, 29),
+    educd    = c(30, 32),
+    empstat  = c(33, 33),
+    empstatd = c(34, 35)
+  ),
+  col_types = "iiiddiiii"
+)
 
 
 ```
