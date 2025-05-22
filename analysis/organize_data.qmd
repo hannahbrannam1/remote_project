@@ -31,9 +31,28 @@ ipums_data <- read_fwf(
     empstat  = c(33, 33),
     empstatd = c(34, 35)
   ),
-  col_types = "iiiddiiii"
+  col_types = cols(.default = "i", perwt = "d")
 )
 
+#Clean and organize the data
+
+cleaned_dataset <- ipums_data |>
+  mutate(
+    sex = factor(sex, levels = c(1, 2), labels = c("Male", "Female")),
+    empstat = factor(empstat, levels = c(1, 2, 3),
+                     labels = c("Employed", "Unemployed", "NIU")),
+    
+    # Replace value code with NA
+    educd = na_if(educd, 999),
+    
+    # Create compound variable
+    educ_emp = interaction(educd, empstat, drop = TRUE)
+  ) |>
+  # Keep only needed variables
+  select(year, perwt, sex, educd, empstat, educ_emp)
+
+# Saved cleaned dataset as RData
+save(cleaned_dataset, file = here("data", "data_constructed", "analytical_data.RData"))
 
 ```
 
