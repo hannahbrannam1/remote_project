@@ -42,14 +42,19 @@ cleaned_dataset <- ipums_data |>
     empstat = factor(empstat, levels = c(1, 2, 3),
                      labels = c("Employed", "Unemployed", "NIU")),
     
-    # Replace value code with NA
-    educd = na_if(educd, 999),
-    
-    # Create compound variable
-    educ_emp = interaction(educd, empstat, drop = TRUE)
+    # Recode educd into meaningful categories
+    educd_cat = case_when(
+      educd < 30 ~ "No High School",
+      educd >= 30 & educd < 63 ~ "High School or Some College",
+      educd == 63 ~ "Bachelor's",
+      educd > 63 ~ "Graduate Degree",
+      TRUE ~ NA_character_
+    ),
+    educd_cat = factor(educd_cat, levels = c(
+      "No High School", "High School or Some College", "Bachelor's", "Graduate Degree"
+    ))
   ) |>
-  # Keep only needed variables
-  select(year, perwt, sex, educd, empstat, educ_emp)
+  select(year, perwt, sex, educd_cat, empstat)
 
 # Saved cleaned dataset as RData
 save(cleaned_dataset, file = here("data", "data_constructed", "analytical_data.RData"))
