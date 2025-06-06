@@ -10,8 +10,64 @@ load(here("data","data_constructed","analytical_data.RData"))
 source(here("utils","check_packages.R"))
 source(here("utils","functions.R"))
 
+library(dplyr)
+library(ggplot2)
+library(modelsummary)
+library(gt)
+
 ```
 
+```{r}
+#| label: filter-college-grads
+# Focus on respondents with college degrees or higher
+college_data <- cleaned_dataset %>%
+  filter(educd >= 101) %>%
+  mutate(
+    employed = ifelse(empstat == "Employed", 1, 0),
+    sex = factor(sex),
+    educd = factor(educd),
+    empstat = factor(empstat)
+  )
+
+# Quick summary
+summary(college_data)
+```
+```{r}
+#| label: employment-gender-plot
+ggplot(college_data, aes(x = empstat, fill = sex)) +
+  geom_bar(position = "fill") +
+  labs(
+    title = "Employment Status by Gender (College-Educated Adults)",
+    y = "Proportion",
+    x = "Employment Status"
+  ) +
+  theme_minimal()
+
+# This bar chart shows that among college graduates, women appear slightly less likely to be employed compared to men.
+# More college-educated women are not in the labor force compared to men.
+# There may be structural, personal, or societal reasons keeping more women out of the labor force, even with a college degree.
+```
+
+```{r}
+#| label: gender-logit-model
+gender_model <- glm(employed ~ sex, data = college_data, family = binomial)
+modelsummary(gender_model, output = "html")
+
+# The odds of being employed for women are about 21% lower than for men with comparable education
+# This data also confirms what the bar plot above said
+
+```
+
+```{r}
+#| label: gender-educ-logit-model
+gender_educ_model <- glm(employed ~ sex + educd, data = college_data, family = binomial)
+
+modelsummary(
+  list("Gender Only" = gender_model, "Gender + Education" = gender_educ_model),
+  fmt = 3,
+  output = "html"
+)
+```
 
 
 This quarto doc is used to analyze the data.
