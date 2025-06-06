@@ -21,12 +21,12 @@ library(gt)
 #| label: filter-college-grads
 # Focus on respondents with college degrees or higher
 college_data <- cleaned_dataset %>%
-  filter(educd >= 101) %>%
+  filter(educd_cat %in% c("Bachelor's", "Graduate Degree")) %>%
   mutate(
     employed = ifelse(empstat == "Employed", 1, 0),
     sex = factor(sex),
-    educd = factor(educd),
-    empstat = factor(empstat)
+    empstat = factor(empstat),
+    educd_cat = factor(educd_cat, levels = c("Bachelor's", "Graduate Degree"))
   )
 
 # Quick summary
@@ -53,14 +53,14 @@ ggplot(college_data, aes(x = empstat, fill = sex)) +
 gender_model <- glm(employed ~ sex, data = college_data, family = binomial)
 modelsummary(gender_model, output = "html")
 
-# The odds of being employed for women are about 21% lower than for men with comparable education
+# The odds of being employed for women are lower than for men with comparable education
 # This data also confirms what the bar plot above said
 
 ```
 
 ```{r}
 #| label: gender-educ-logit-model
-gender_educ_model <- glm(employed ~ sex + educd, data = college_data, family = binomial)
+gender_educ_model <- glm(employed ~ sex + educd_cat, data = college_data, family = binomial)
 
 modelsummary(
   list("Gender Only" = gender_model, "Gender + Education" = gender_educ_model),
