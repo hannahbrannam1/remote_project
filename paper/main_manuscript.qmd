@@ -28,7 +28,7 @@ format:
 library(here)
 source(here("utils","check_packages.R"))
 source(here("utils","functions.R"))
-
+load(here("data", "data_constructed", "analytical_data.RData"))
 ```
 
 # Introduction
@@ -39,15 +39,71 @@ This quarto doc is for writing the manuscript. This is a test citation [@alba199
 
 People have been studying the differences between men and women in employment for a long time. We know that having a college degree usually helps people get jobs, but it’s not clear if women with college degrees have the same chances of being employed as men with the same education. This study looks at whether women with college degrees are less likely to have jobs compared to men, using recent data from across the country.
 
+
 # Data and Methods
 
-I downloaded a custom extract from IPUMS that includes the following variables:  
-- SEX: Coded to distinguish men and women  
-- EDUC: Educational attainment  
-- EMPSTAT: Employment status  
+We use individual-level data from the 2022 American Community Survey (ACS), accessed through a custom extract from IPUMS. Key variables include:
 
-The sample includes hundreds of thousands of respondents, making the findings highly generalizable to the U.S. population. All data used are from the 2022 ACS 1-Year Sample.
+- SEX: Indicates respondent gender  
+- EDUC: Categorical educational attainment  
+- EMPSTAT: Employment status (Employed, Unemployed, or Not in Universe)  
+
+To focus on people who are actually part of the labor force, we left out anyone marked as "Not in Universe" (NIU), like retirees or those not working by choice. This helps us better measure who is likely to be employed.
+
+The dataset is very large, over 2.8 million people, so our results are reliable. We made a new variable called 'employed', which is 1 for people with jobs and 0 for those without. Education is grouped into five levels: No Degree, High School, Some College, Bachelor's, and Graduate Degree.
+
+We estimate two logistic regression models:
+
+1. A basic model regressing employment status on gender  
+2. An extended model including education and an interaction between gender and education level  
+
+We use bar plots to visualize gender differences in employment status. 
+
+This analysis does not control for some important factors like age, care giving responsibilities, marital status, or job type. These things can influence someone’s employment status and could explain part of the differences we see. Because we didn’t control for them, the results may still reflect broader life or social differences between men and women. Even though the data set is large and reliable, these limitations are worth keeping in mind.
+
 
 # Results
 
-# Conclusions
+Figure 1 shows that a higher proportion of men are employed compared to women, and women are slightly more likely to not be working. Even among people with college degrees, men are more likely to be employed than women. This supports what we already know about labor force participation differences between men and women.
+
+
+## Figure 1. Employment Status by Gender
+
+## Table 1. Logistic Regression: Employment ~ Gender
+
+```{r}
+
+gender_model <- glm(employed ~ sex, data = analysis_data, family = binomial)
+modelsummary(gender_model, output = "gt")
+
+``` 
+
+Table 1: In the first model, women are significantly less likely to be employed than men, even when focusing on college graduates. In the extended model that accounts for education levels and interactions, we find that the employment gap is smaller for women with graduate degrees, but it persists across all levels. These findings suggest systemic differences in employment likelihood that go beyond education alone.
+
+```{r}
+gender_educ_model <- glm(employed ~ sex * educd_cat, data = analysis_data, family = binomial)
+
+modelsummary(
+  list("Gender Only" = gender_model, "Gender + Education + Interaction" = gender_educ_model),
+  fmt = 3,
+  output = "gt"
+)
+
+``` 
+In the second model, we add education levels and interaction terms between gender and education. These results show that education helps boost employment for everyone, but the benefit is not always equal.
+
+The gender gap is smaller for women with higher levels of education.
+Women with graduate degrees are closer to men in terms of employment odds, but a gap still exists.
+The interaction terms for women with bachelor's and graduate degrees are positive, meaning education does help narrow the gap.
+So, while college degrees improve employment chances overall, they don’t fully erase the gender differences.
+
+Conclusions
+
+This study looked at whether women with college degrees are less likely to be employed than men with similar education. Using recent national data from the 2022 ACS, we found that:
+ * Women are less likely to be employed than men, even when they have the same level of education.
+ * The gap is smaller for people with graduate degrees, but it still exists.
+
+These results suggest that getting a college degree helps, but it’s not enough on its own to close the gender gap in employment. Other factors not included in our models—like age, care giving, and job types—likely also play a role.
+
+Future research should include more variables like age, family responsibilities, and occupation. It would also be helpful to use longitudinal data to see if women experience more job interruptions over time. Even with these limitations, this study helps show that education alone doesn’t explain the full picture of gender inequality in employment.
+

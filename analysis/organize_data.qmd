@@ -44,15 +44,16 @@ cleaned_dataset <- ipums_data |>
     
     # Recode educd into meaningful categories
     educd_cat = case_when(
-      educd < 30 ~ "No High School",
-      educd >= 30 & educd < 63 ~ "High School or Some College",
-      educd == 63 ~ "Bachelor's",
-      educd > 63 ~ "Graduate Degree",
-      TRUE ~ NA_character_
-    ),
-    educd_cat = factor(educd_cat, levels = c(
-      "No High School", "High School or Some College", "Bachelor's", "Graduate Degree"
-    ))
+  educd %in% c(2:61) ~ "No Degree",
+  educd %in% c(62, 63) ~ "High School",
+  educd %in% c(64, 65, 81, 91) ~ "Some College",
+  educd == 101 ~ "Bachelor's",
+  educd %in% c(114, 115, 116) ~ "Graduate Degree",
+  TRUE ~ NA_character_
+),
+educd_cat = factor(educd_cat, levels = c(
+  "No Degree", "High School", "Some College", "Bachelor's", "Graduate Degree"
+))
   ) |>
   select(year, perwt, sex, educd_cat, empstat)
 

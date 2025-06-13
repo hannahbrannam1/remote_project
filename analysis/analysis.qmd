@@ -18,55 +18,56 @@ library(gt)
 ```
 
 ```{r}
-#| label: filter-college-grads
-# Focus on respondents with college degrees or higher
-college_data <- cleaned_dataset %>%
-  filter(educd_cat %in% c("Bachelor's", "Graduate Degree")) %>%
+#| label: filter-clean-data
+# Retain all levels of education to examine differences by both gender and education
+analysis_data <- cleaned_dataset %>%
+  filter(!empstat %in% c("Not in Universe", "NIU")) %>%
   mutate(
     employed = ifelse(empstat == "Employed", 1, 0),
     sex = factor(sex),
     empstat = factor(empstat),
-    educd_cat = factor(educd_cat, levels = c("Bachelor's", "Graduate Degree"))
+    educd_cat = factor(educd_cat, levels = c("No Degree", "High School", "Some College", "Bachelor's", "Graduate Degree"))
   )
 
-# Quick summary
-summary(college_data)
+# Quick summary of the cleaned dataset
+summary(analysis_data)
 ```
 ```{r}
 #| label: employment-gender-plot
-ggplot(college_data, aes(x = empstat, fill = sex)) +
+ggplot(analysis_data, aes(x = empstat, fill = sex)) +
   geom_bar(position = "fill") +
   labs(
-    title = "Employment Status by Gender (College-Educated Adults)",
+    title = "Employment Status by Gender (Excludes NIU)",
     y = "Proportion",
     x = "Employment Status"
   ) +
   theme_minimal()
 
-# This bar chart shows that among college graduates, women appear slightly less likely to be employed compared to men.
-# More college-educated women are not in the labor force compared to men.
-# There may be structural, personal, or societal reasons keeping more women out of the labor force, even with a college degree.
+# This bar chart shows the proportion of employed and unemployed individuals by gender
+# Among those in the labor force, women appear slightly less likely to be employed than men
 ```
 
 ```{r}
 #| label: gender-logit-model
-gender_model <- glm(employed ~ sex, data = college_data, family = binomial)
+gender_model <- glm(employed ~ sex, data = analysis_data, family = binomial)
 modelsummary(gender_model, output = "html")
 
-# The odds of being employed for women are lower than for men with comparable education
+# The odds of being employed for women are lower than for men overall.
 # This data also confirms what the bar plot above said
 
 ```
 
 ```{r}
 #| label: gender-educ-logit-model
-gender_educ_model <- glm(employed ~ sex + educd_cat, data = college_data, family = binomial)
+gender_educ_model <- glm(employed ~ sex * educd_cat, data = analysis_data, family = binomial)
 
 modelsummary(
-  list("Gender Only" = gender_model, "Gender + Education" = gender_educ_model),
+  list("Gender Only" = gender_model, "Gender + Education + Interaction" = gender_educ_model),
   fmt = 3,
   output = "html"
 )
+
+# This model includes interaction terms to see how the gender gap in employment varies by education level.
 ```
 
 
